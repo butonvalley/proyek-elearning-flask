@@ -24,9 +24,6 @@ from utils.generator import generate_unique_username
 
 main_bp = Blueprint("main", __name__)
 
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 @main_bp.route("/")
 @login_required
 def home_view():
