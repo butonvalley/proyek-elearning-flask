@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+	 <meta name="viewport" content="width=device-width, initial-scale=1" />
+	{% block head %}
+	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+	<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
+	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+	<title>{% block title %}{% endblock %} - Elearning</title>
+
+	{% endblock %}
+</head>
+
+<body class="flex flex-col gap-4">
+	<header>
+		<nav x-data="{ mobileMenuIsOpen: false }" x-on:click.away="mobileMenuIsOpen = false"
+			class="flex items-center justify-between border-b border-neutral-300 px-6 py-4 dark:border-neutral-700"
+			aria-label="penguin ui menu">
+
+			<div class="text-2xl font-bold text-neutral-900 dark:text-white">
+				<a href="{{ url_for('main.home_view') }}">
+					<span>PROYEK E-<span class="text-black dark:text-white">Learning</span>
+						<!-- <img src="./logo.svg" alt="brand logo" class="w-10" /> -->
+				</a>
+			</div>
+
+			{% if current_user.is_authenticated %}
+			<ul class="items-center gap-4 md:flex">
+				<li>
+					<form action="{{ url_for('main.logout_view') }}" method="POST"
+						class="font-medium text-neutral-600 hover:text-black dark:text-neutral-300 dark:hover:text-white">
+
+						{{ form_logout.hidden_tag() }}
+						{{ form_logout.submit(class="cursor-pointer") }}
+
+					</form>
+				</li>
+			</ul>
+			{% else %}
+			<ul class="items-center gap-4 md:flex">
+				<li>
+					<a href="{{ url_for('main.login_view') }}"
+						class="font-medium text-neutral-600 hover:text-black dark:text-neutral-300 dark:hover:text-white">
+						Login
+					</a>
+				</li>
+			</ul>
+			{% endif %}
+
+		</nav>
+	</header>
+	<div id="content">{% block content %}{% endblock %}</div>
+
+	<div class="p-4">
+		{% block footer %}
+		&copy; 2025 - PROYEK ELEARNING
+		{% endblock %}
+	</div>
+</body>
+
+</html>

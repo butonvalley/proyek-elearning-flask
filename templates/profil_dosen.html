@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block title %}Profil{% endblock %}
+
+{% block content %}
+<div
+    class="group flex rounded-sm w-full flex-col overflow-hidden border border-neutral-300 bg-neutral-50 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+  
+    <div class="relative h-36">
+        <div class="h-full w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+        <div
+            class="relative z-10 mx-auto -mt-14 size-28 overflow-hidden rounded-full border-4 border-neutral-50 dark:border-neutral-900">
+              <img src="{{ url_for('static', filename='images/person.png') }}"
+                class="h-full object-cover transition duration-700 ease-out group-hover:scale-105" alt="avatar" />
+        </div>
+    </div>
+    <!-- Body -->
+    <div class="flex flex-col gap-2 p-6 text-center mt-12">
+        <h3 class="text-balance text-xl font-bold text-neutral-900 lg:text-2xl dark:text-white"
+            aria-describedby="profileDescription">{{current_user.fullname}}</h3>
+        <span
+            class="mx-auto w-fit bg-black px-2 py-1 text-xs text-neutral-100 dark:bg-white dark:text-black rounded-sm">DOSEN</span>
+
+    </div>
+</div>
+
+ 
+ <!-- Tampilkan flash message -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="m-4 ">
+        {% for category, message in messages %}
+        <div class="px-4 py-2 rounded mb-2
+                        {% if category == 'success' %} bg-green-100 text-green-700
+                        {% elif category == 'error' %} bg-red-100 text-red-700
+                        {% elif category == 'warning' %} bg-yellow-100 text-yellow-700
+                        {% else %} bg-gray-100 text-gray-700 {% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+<div class="px-4 flex flex-col md:flex-row gap-4 my-4">
+    <div class="w-full md:w-1/2">
+        <div class="flex justify-between gap-4 bg-green-300 p-4">
+            <h3 class="font-bold">Mata Kuliah Saya</h3>
+            <a class="underline" href="{{ url_for('main.add_matakuliah_view') }}">Tambah Matakuliah</a>
+        </div>
+
+        <ul class="bg-green-100 p-4">
+            {% for mk in matakuliah %}
+            <li>{{ mk.kode }} - {{ mk.nama }} </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="w-full md:w-1/2">
+        <div class="flex justify-between gap-4 bg-red-300 p-4">
+            <h3 class="font-bold">Kelas Saya</h3>
+            <a class="underline" href="{{ url_for('main.add_kelas_view') }}">Tambah Kelas</a>
+        </div>
+
+        <ul class="bg-red-100 p-4">
+            {% for k in kelas %}
+            <li>
+                <div class="flex gap-4 justify-between mb-4">
+                    <span> {{ k.nama }} | {{ k.matakuliah.nama }} | {{ k.semester }} | {{ k.tahun_ajaran }}</span>
+                    <a class="underline" href="{{ url_for('main.join_kelas_view', id=k.id) }}">Join Kelas</a>
+                </div>
+               
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
