@@ -23,7 +23,7 @@ Alur kerja sistem:
 
 DIBUAT OLEH:
 
-    La Ati ( 22650156 )
+    La Ati ( 23650231 )
     Backend Developer
         
     Dyah Chandra Priyanka ( 22650156 )
