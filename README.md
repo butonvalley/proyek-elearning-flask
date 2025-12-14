@@ -21,5 +21,12 @@ Alur kerja sistem:
     Dosen memanajemen (CRUD) kelas dan matakuliah nya masing masing
     Mahasiswa dapat melakukan join kelas serta matakuliah semua DOSEN
 
+DIBUAT OLEH:
+    La Ati ( 23650231 )
+    Backend Developer
+    
+    Dyah Chandra Priyanka ( 22650156 )
+    UI/UX & Frontend Developer
+
 
 PROYEK INI MASIH DALAM PENGEMBANGAN
