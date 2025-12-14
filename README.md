@@ -29,5 +29,6 @@ DIBUAT OLEH:
     Dyah Chandra Priyanka ( 22650156 )
     UI/UX & Frontend Developer
 
+Demo Proyek: https://elearning.butonvalley.com
 
 PROYEK INI MASIH DALAM PENGEMBANGAN
