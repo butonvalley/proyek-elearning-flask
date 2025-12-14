@@ -3,5 +3,11 @@ name = "proyek-elearning"
 version = "1.0.0"
 requires-python = ">=3.10"
 dependencies = [
-  "flask>=3.1",
+    "flask>=3.1",
+    "flask-login>=0.6",
+    "flask-wtf>=1.1",
+    "flask-migrate>=4.0",
+    "flask-sqlalchemy>=3.0",
+    "python-dotenv>=1.0",
+    "psycopg[binary]>=3.3"
 ]
