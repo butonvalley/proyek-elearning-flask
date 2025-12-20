@@ -251,13 +251,13 @@ def register_view():
 
     if form.validate_on_submit():
         email = form.email.data
-        # 🔒 cek username sudah ada
+        # cek username sudah ada
         if User.query.filter_by(email=email).first():
             flash("Email sudah digunakan", "error")
             return redirect(url_for("main.register_view"))
       
         try:
-            # 1️⃣ buat user
+            # buat user
             user = User(
                 fullname=form.fullname.data,
                 email=email,
@@ -270,7 +270,7 @@ def register_view():
             db.session.flush()  
             # flush agar user.id tersedia tanpa commit
 
-            # 3️⃣ commit
+            # commit
             db.session.commit()
 
             flash("Registrasi berhasil, silakan login", "success")
@@ -330,7 +330,7 @@ def register_data_mahasiswa_view():
 @login_required
 def register_data_dosen_view():
     form = DosenForm()
-    form.set_choices()  # isi pilihan matakuliah
+    
 
     # cek apakah user sudah punya Dosen
     dosen = getattr(current_user, "dosen", None)
@@ -368,8 +368,7 @@ def register_data_dosen_view():
     # jika dosen sudah ada, isi default form
     if dosen and request.method == "GET":
         form.nidn.data = dosen.nidn
-        form.matakuliah.data = [str(m.id) for m in dosen.matakuliah]
-
+        
     return render_template("register_data_dosen.html", form=form)
 
 @main_bp.route("/logout", methods=["POST"])
