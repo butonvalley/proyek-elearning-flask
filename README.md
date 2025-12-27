@@ -1,4 +1,5 @@
 PROYEK ELEARNING V1.0
+
 PROYEK INI MASIH DALAM PENGEMBANGAN
 
 Framework:
@@ -9,6 +10,7 @@ suppoert Postgresql & Serveless postgresql seperti supabase
 
 Sebelum Migrasi Database pada main.py aktifkan migrasi: migrate.init_app(app, db) #proddction 
 perintah migrasi:
+
     jika masih projek baru:
         export FLASK_APP=main.py
         flask db init
@@ -63,7 +65,7 @@ PROYEK ELEARNING V1.1
         
 Notes: 
     - Next Update V1.3 (Pengelolaan File Tugas dan Jawaban Tugas ke Serveless Storage)
+    
     - Code Program pada Fitur Tugas dapat di lihat pada timeline commit
     
-
->>>>>>> 748952e (Update fitur elearning)
+    
