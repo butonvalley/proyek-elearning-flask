@@ -1,39 +1,39 @@
-PROYEK ELEARNING V1.0
+# PROYEK ELEARNING V1
 
-PROYEK INI MASIH DALAM PENGEMBANGAN
+**PROYEK INI MASIH DALAM PENGEMBANGAN**
 
-Framework:
-Flask
+## Framework
+- Flask
 
-DATABASE:
-suppoert Postgresql & Serveless postgresql seperti supabase
+## Database
+- Support PostgreSQL & Serverless PostgreSQL seperti Supabase
 
-Sebelum Migrasi Database pada main.py aktifkan migrasi: migrate.init_app(app, db) #proddction 
-perintah migrasi:
+## Migrasi Database
+Sebelum migrasi, pastikan `migrate.init_app(app, db)` pada `main.py` aktif (untuk production).
 
-    jika masih projek baru:
+### Jika projek baru:
 
-        export FLASK_APP=main.py
-        flask db init
-        flask db migrate -m "initial migration"
-        flask db upgrade
+export FLASK_APP=main.py
+flask db init
+flask db migrate -m "initial migration"
+flask db upgrade
 
-    jika sudah beberapa kali migrasi:
-    
-        export FLASK_APP=main.py
-        flask db migrate -m "initial migration"
-        flask db upgrade
+### jika sudah beberapa kali migrasi:
 
-run:
+export FLASK_APP=main.py
+flask db migrate -m "initial migration"
+flask db upgrade
 
-    flask --app main.py run
+## run:
 
-Alur kerja sistem:    
-    Dosen memanajemen (CRUD) kelas dan matakuliah nya masing masing
-    Mahasiswa dapat melakukan join kelas semua DOSEN
+flask --app main.py run
+
+## Alur kerja sistem:    
+Dosen memanajemen (CRUD) kelas dan matakuliah nya masing masing
+Mahasiswa dapat melakukan join kelas semua DOSEN
 
 
-DIBUAT OLEH:
+## DIBUAT OLEH:
 
     La Ati ( 23650231 )
     Backend Developer
@@ -41,7 +41,7 @@ DIBUAT OLEH:
     Dyah Chandra Priyanka ( 22650156 )
     UI/UX & Frontend Developer
 
-Demo Proyek: 
+## Demo Proyek: 
     https://elearning.butonvalley.com
     
     Dosen: 
