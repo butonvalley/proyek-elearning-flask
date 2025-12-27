@@ -12,17 +12,20 @@ Sebelum Migrasi Database pada main.py aktifkan migrasi: migrate.init_app(app, db
 perintah migrasi:
 
     jika masih projek baru:
+
         export FLASK_APP=main.py
         flask db init
         flask db migrate -m "initial migration"
         flask db upgrade
 
     jika sudah beberapa kali migrasi:
+    
         export FLASK_APP=main.py
         flask db migrate -m "initial migration"
         flask db upgrade
 
 run:
+
     flask --app main.py run
 
 Alur kerja sistem:    
@@ -49,23 +52,23 @@ Demo Proyek:
         email: mahasiswa1@gmail.com
         password: 12345
 
-UPDATE:
-PROYEK ELEARNING V1.1
-    - Role Dosen:
-        - Fitur Tugas Kelas
-            - tambah tugas
-            - periksa jawaban mahasiswa
-    - Role Mahasiswa:
-        - Fitur Tugas Kelas
-            - Lihat semua tugas kelas
-            - Kirim jawaban tugas kelas
-            - jika jawaban tugas kelas sudah dikirim, maka form kirim jawaban  berubah menjadi label CEKLIST Telah Dikirim, jika sudah diberi nilai maka akan berubah menjadi label Nilai: (nominal nilai)
-        - Fitur IPK Kelas
-            IPK kelas merupakan jumlah keseluruhan nilai tugas kelas dibagi dengan jumlah tugas kelas
-        
-Notes: 
-    - Next Update V1.3 (Pengelolaan File Tugas dan Jawaban Tugas ke Serveless Storage)
-    
-    - Code Program pada Fitur Tugas dapat di lihat pada timeline commit
+# UPDATE: PROYEK ELEARNING V1.1
+
+## Role Dosen
+- **Fitur Tugas Kelas**
+  - Tambah tugas
+  - Periksa jawaban mahasiswa
+
+## Role Mahasiswa
+- **Fitur Tugas Kelas**
+  - Lihat semua tugas kelas
+  - Kirim jawaban tugas kelas
+  - Jika jawaban tugas kelas sudah dikirim, form kirim jawaban berubah menjadi label **CEKLIST Telah Dikirim**, jika sudah diberi nilai maka akan berubah menjadi label **Nilai: (nominal nilai)**
+- **Fitur IPK Kelas**
+  - IPK kelas merupakan jumlah keseluruhan nilai tugas kelas dibagi dengan jumlah tugas kelas
+
+### Notes
+- Next Update V1.3 (Pengelolaan File Tugas dan Jawaban Tugas ke Serverless Storage)
+- Code program pada Fitur Tugas dapat dilihat pada timeline commit
     
     
