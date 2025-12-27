@@ -14,14 +14,14 @@
 </head>
 
 <body class="flex flex-col gap-4">
-	<header>
+	<header class="sticky top-0 z-10 bg-neutral-50">
 		<nav x-data="{ mobileMenuIsOpen: false }" x-on:click.away="mobileMenuIsOpen = false"
-			class="flex items-center justify-between border-b border-neutral-300 px-6 py-4 dark:border-neutral-700"
+			class="flex items-center justify-between border-b border-neutral-300 px-6 py-4 dark:border-neutral-700 "
 			aria-label="penguin ui menu">
 
-			<div class="text-2xl font-bold text-neutral-900 dark:text-white">
+			<div class="text-2xl font-bold">
 				<a href="{{ url_for('main.home_view') }}">
-					<span>PROYEK E-<span class="text-black dark:text-white">Learning</span>
+					<span>PROYEK E-<span class="">Learning</span>
 						<!-- <img src="./logo.svg" alt="brand logo" class="w-10" /> -->
 				</a>
 			</div>
@@ -30,7 +30,7 @@
 			<ul class="items-center gap-4 md:flex">
 				<li>
 					<form action="{{ url_for('main.logout_view') }}" method="POST"
-						class="font-medium text-neutral-600 hover:text-black dark:text-neutral-300 dark:hover:text-white">
+						class="font-medium">
 
 						{{ form_logout.hidden_tag() }}
 						{{ form_logout.submit(class="cursor-pointer") }}

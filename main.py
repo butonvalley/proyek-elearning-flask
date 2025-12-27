@@ -16,6 +16,8 @@ from endpoints.routes import main_bp
 login_manager = LoginManager()
 login_manager.login_view = "main.login_view"  # route login default
 
+UPLOAD_FOLDER = None 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -25,7 +27,7 @@ def create_app():
     app.config.from_object(Config)
 
     db.init_app(app)
-    #migrate.init_app(app, db) #proddction 
+    migrate.init_app(app, db) #proddction 
     csrf.init_app(app) 
     login_manager.init_app(app) 
     app.register_blueprint(main_bp)

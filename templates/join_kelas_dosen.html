@@ -41,9 +41,9 @@
 {% endif %}
 {% endwith %}
 
-<div class="px-4 flex flex-col md:flex-row gap-4 my-4">
+<div class="px-4 grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
 
-    <div class="w-full md:w-1/2 ">
+    <div class="w-full ">
         <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
             <h3 class="font-bold">{{ kelas.nama }} | {{ kelas.matakuliah.nama }} | {{ kelas.semester }} | {{
                 kelas.tahun_ajaran }}
@@ -51,40 +51,55 @@
             <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Unggah Materi</a>
         </div>
 
-        <div>
-            <span>Materi {{kelas.matakuliah.nama}} ==> </span>
+        <div class="flex gap-4 justify-between">
+            <span>Materi {{kelas.matakuliah.nama}} </span>
             <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Download</a>
         </div>
 
     </div>
-    <div class="w-full  md:w-1/2">
+    <div class="w-full ">
+        <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
+            <h3 class="font-bold">
+                Tugas Kelas
+            </h3>
+            <a class="underline bg-green-100 px-2 py-1 rounded-sm"
+                href="{{ url_for('main.tambah_tugas', kelas_id=kelas.id) }}">Unggah Tugas</a>
+        </div>
+        <div class="flex flex-col gap-3">
+            {% for tk in tugas_kelas %}
+            <div class="flex gap-4 justify-between px-4">
+                <div class="font-bold">{{ tk.judul }}</div>
+                <div class="font-bold">Batas Waktu: {{ tk.deadline }}</div>
+                <div class="flex gap-4">
+                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank" href="{{ url_for('static', filename='uploads/tugas/' ~ tk.file_tugas) }}">Lihat</a>
+                    <a href="{{ url_for('main.periksa_jawaban_tugas', kelas_id=tk.kelas_id, tugas_id=tk.id) }}">Periksa</a>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+    <div class="w-full ">
         <div class="bg-red-300 p-4 mb-4">
             <h3 class="font-bold">
                 Mahasiswa yang bergabung
             </h3>
         </div>
-        {% for km in kelas_mahasiswa %}
-        <div class="flex gap-4 justify-between px-4">
-            <div class="font-bold">{{ km.mahasiswa.user.fullname }}</div>
-            <div>
-                <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Lihat Tugas</a>
+        <div class="flex flex-col gap-3">
+            {% for km in kelas_mahasiswa %}
+            <div class="flex gap-4 justify-between px-4">
+                <div class="font-bold">{{ km.mahasiswa.user.fullname }}</div>
+            
+                <!--untuk update v1.3
+                <div>                   
+                  Nilai Kumulatif:  <span class="font-bold text-2xl">{{km.nilai_akhir if km.nilai_akhir is not none else 0 }}</span> 
+                </div>
+                -->
+                
             </div>
-            <div>
-                <form method="POST" action="{{ url_for('main.kelas_mahasiswa_update') }}">
-                    {{ kelas_mahasiswa_form.hidden_tag() }}
-
-                    <input type="hidden" name="kelas_mahasiswa_id" value="{{ km.id }}">
-                    <div class="flex gap-4 items-center">
-                        {{ kelas_mahasiswa_form.nilai_akhir.label }}
-                        <input type="number" name="nilai_akhir"
-                            value="{{ km.nilai_akhir if km.nilai_akhir is not none else '' }}"
-                            class="px-2 py-1 border rounded-lg w-24">
-                    </div>
-                </form>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-
 
     </div>
 </div>

@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 class KelasMahasiswaForm(FlaskForm):
     #update selanjutnya tambahkan dengan item lainnya
     nilai_akhir = FloatField(
-        "Nilai Akhir",
+        "Nilai Kumulatif",
         validators=[
             Optional(),
             NumberRange(min=0, max=100, message="Nilai harus 0–100")

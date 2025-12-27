@@ -53,18 +53,72 @@
         <div class="flex flex-col gap-4 justify-between">
 
             <div class="flex gap-4 justify-between">
-
-                <div>
-                    <span>Materi {{kelas.matakuliah.nama}} ==> </span>
+             
+                    <span>Materi {{kelas.matakuliah.nama}} </span>
                     <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Download</a>
+                           
+            </div>
+            <div class="w-full ">
+                <div class="bg-green-300 p-4 mb-4 flex justify-between gap-4">
+                    <h3 class="font-bold">
+                        Tugas Kelas
+                    </h3>
+                   <div >
+                    Nilai IPK Kelas: <span class="font-bold text-2xl">{{nilai_ipk_kelas}}</span> 
+                   </div> 
                 </div>
-                
-                {% if kelas_mahasiswa.nilai_akhir %}
-                <span class="font-bold bg-green-100 px-2 py-1 rounded-sm">{{kelas_mahasiswa.nilai_akhir}}</span>
-                {% else %}
-                <a href="#" class="underline bg-green-100 px-2 py-1 rounded-sm">Unggah Tugas</a>
-                {% endif %}
+                <div class="flex flex-col gap-3">
 
+                    {% for tugas, jawaban in tugas_kelas %}
+                    <div class="flex gap-4 justify-between px-4 border-b py-3">
+
+                        <div>
+                            <div class="font-bold">{{ tugas.judul }}</div>
+                            <div class="text-sm text-gray-500">
+                                Deadline: {{ tugas.deadline }}
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 items-center">
+
+                            <a class="underline bg-blue-100 px-2 py-1 rounded-sm" target="_blank"
+                                href="{{ url_for('static', filename='uploads/tugas/' ~ tugas.file_tugas) }}">
+                                Lihat
+                            </a>
+                            {% if jawaban %}
+
+                            {% if jawaban.nilai is not none %}
+                            <span class="bg-yellow-100 px-2 py-1 rounded-sm ">
+                                Nilai: <span class="font-bold ">{{ jawaban.nilai }}</span>
+                            </span>
+                            {% else %}
+                            <span class="bg-green-100 px-2 py-1 rounded-sm">
+                                ✅ Telah dikirim
+                            </span>
+
+                            {% endif %}
+
+                            {% else %}
+                            <form method="POST" enctype="multipart/form-data"
+                                action="{{ url_for('main.upload_jawaban', tugas_id=tugas.id) }}">
+
+                                {{ form_tugas.hidden_tag() }}
+
+                                {{ form_tugas.file_jawaban(class="") }}
+
+                                <button type="submit"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                    Kirim Jawaban
+                                </button>
+                            </form>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
             </div>
         </div>
 

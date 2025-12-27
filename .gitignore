@@ -36,3 +36,5 @@ migrations/
 Thumbs.db
 .vercel
 .env*.local
+
+vercel.json

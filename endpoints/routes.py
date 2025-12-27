@@ -11,18 +11,25 @@ from forms.logout_form import LogoutForm
 from forms.mahasiswa_form import MahasiswaForm
 from forms.matakuliah_form import MataKuliahForm
 from forms.register_form import RegisterForm
+from forms.tugas_form import TugasForm
+from forms.tugas_mahasiswa_form import TugasMahasiswaForm
 from models.dosen import Dosen
 from models.kelas import Kelas
 from models.kelas_mahasiswa import KelasMahasiswa
 from models.mahasiswa import Mahasiswa
 from models.matakuliah import MataKuliah
+from models.tugas import Tugas
+from models.tugas_mahasiswa import TugasMahasiswa
 from models.user import User
 
 from werkzeug.security import generate_password_hash,check_password_hash
 
 from utils.generator import generate_unique_username
 
+from sqlalchemy.orm import aliased
+
 main_bp = Blueprint("main", __name__)
+
 
 @main_bp.route("/")
 @login_required
@@ -104,11 +111,13 @@ def join_kelas_view(id):
             kelas_id=kelas.id
         ).all()
         form_kelas_mahasiswa = KelasMahasiswaForm()
+        tugas_kelas = Tugas.query.filter_by(kelas_id = kelas.id).all()
         return render_template(
             "join_kelas_dosen.html",
             form_logout=form_logout,
             kelas=kelas,
             kelas_mahasiswa = km,
+            tugas_kelas = tugas_kelas,
             kelas_mahasiswa_form = form_kelas_mahasiswa
         )
 
@@ -138,12 +147,41 @@ def join_kelas_view(id):
             flash(f"Anda berhasil bergabung di {kelas.nama}", "success")
         else:
             flash(f"Anda sudah terdaftar di {kelas.nama}", "info")
+        
+        Jawaban = aliased(TugasMahasiswa)
 
+        tugas_kelas = (
+            db.session.query(Tugas, Jawaban)
+            .outerjoin(
+                Jawaban,
+                (Jawaban.tugas_id == Tugas.id) &
+                (Jawaban.mahasiswa_id == mahasiswa.id)
+            )
+            .filter(Tugas.kelas_id == kelas.id)
+            .all()
+        )
+
+        total_tugas = len(tugas_kelas)
+
+        total_nilai = sum(
+            jawaban.nilai
+            for _, jawaban in tugas_kelas
+            if jawaban and jawaban.nilai is not None
+        )
+
+        if total_tugas > 0:
+            nilai_ipk_kelas = total_nilai / total_tugas
+        else:
+            nilai_ipk_kelas = 0
+
+        form_tugas = TugasMahasiswaForm()
         return render_template(
             "join_kelas_mahasiswa.html",
             form_logout=form_logout,
             kelas=kelas,
-            kelas_mahasiswa = km
+            tugas_kelas = tugas_kelas,
+            nilai_ipk_kelas=round(nilai_ipk_kelas, 2),
+            form_tugas = form_tugas
         )
 
     # ======================
@@ -469,3 +507,142 @@ def tos_view():
 @main_bp.route("/page/<slug>")
 def page_view():   
     return render_template("page.html")
+
+@main_bp.route("/kelas/<kelas_id>/tugas/tambah", methods=["GET", "POST"])
+@login_required
+def tambah_tugas(kelas_id):
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    kelas = Kelas.query.get_or_404(kelas_id)
+    form = TugasForm()
+
+    if form.validate_on_submit():
+        print("valid")
+        filename = None
+        if form.file_tugas.data:
+            
+            filename = "tugas.pdf"
+
+            #Update V1.3 Upload ke Serveless Storage
+            #filename = secure_filename(form.file_tugas.data.filename)
+            #form.file_tugas.data.save(
+            #   Logic Serveless Storage
+            #)
+
+        tugas = Tugas(
+            kelas_id=kelas.id,
+            dosen_id=dosen.id,
+            judul=form.judul.data,
+            deskripsi=form.deskripsi.data,
+            file_tugas=filename,
+            deadline=form.deadline.data
+        )
+        db.session.add(tugas)
+        db.session.commit()
+
+        flash("Tugas berhasil diupload", "success")
+        return redirect(url_for("main.join_kelas_view", id=kelas.id))
+
+    form_logout = LogoutForm()
+    return render_template("tambah_tugas.html", form=form, kelas=kelas,form_logout=form_logout)
+
+#upload Jawaban oleh Mahasiswa
+@main_bp.route("/tugas/<tugas_id>/jawaban", methods=["POST"])
+@login_required
+def upload_jawaban(tugas_id):
+    mahasiswa = getattr(current_user, "mahasiswa", None)
+    if not mahasiswa:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    tugas = Tugas.query.get_or_404(tugas_id)
+    form = TugasMahasiswaForm()
+
+    if form.validate_on_submit():
+        filename = "jawaban.pdf"
+        
+        #update V1.3 Upload ke Serveless Storage
+        # filename = secure_filename(form.file_jawaban.data.filename)
+        # logic serveless storage
+
+        jawaban = TugasMahasiswa(
+            tugas_id=tugas.id,
+            mahasiswa_id=mahasiswa.id,
+            file_jawaban=filename
+        )
+        db.session.add(jawaban)
+        db.session.commit()
+
+        flash("Jawaban berhasil dikumpulkan", "success")
+
+    return redirect(url_for("main.join_kelas_view", id=tugas.kelas_id))
+
+#periksa tugas oleh dosen
+@main_bp.route("/kelas/<kelas_id>/tugas/<tugas_id>/periksa", methods=["GET", "POST"])
+@login_required
+def periksa_jawaban_tugas(kelas_id, tugas_id):
+    form_logout = LogoutForm()
+
+    # ======================
+    # VALIDASI DOSEN
+    # ======================
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak. Hanya dosen yang dapat mengakses halaman ini.", "error")
+        return redirect(url_for("main.home_view"))
+
+    # ======================
+    # AMBIL KELAS & TUGAS
+    # ======================
+    kelas = Kelas.query.filter_by(id=kelas_id).first_or_404()
+    tugas = Tugas.query.filter_by(id=tugas_id, kelas_id=kelas.id).first_or_404()
+
+    # Pastikan tugas milik dosen tersebut
+    if tugas.dosen_id != dosen.id:
+        flash("Anda tidak memiliki hak atas tugas ini.", "error")
+        return redirect(url_for("main.join_kelas_view", id=kelas.id))
+
+    # ======================
+    # POST → UPDATE NILAI
+    # ======================
+    if request.method == "POST":
+        jawaban_id = request.form.get("jawaban_id")
+        nilai = request.form.get("nilai")
+
+        jawaban = TugasMahasiswa.query.filter_by(
+            id=jawaban_id,
+            tugas_id=tugas.id
+        ).first()
+
+        if jawaban:
+            jawaban.nilai = float(nilai)
+            db.session.commit()
+            flash("Nilai berhasil disimpan.", "success")
+        else:
+            flash("Data jawaban tidak ditemukan.", "error")
+
+        return redirect(
+            url_for("main.periksa_jawaban_tugas", kelas_id=kelas.id, tugas_id=tugas.id)
+        )
+
+    # ======================
+    # GET → AMBIL JAWABAN
+    # ======================
+    jawaban_mahasiswa = (
+        TugasMahasiswa.query
+        .filter_by(tugas_id=tugas.id)
+        .join(Mahasiswa)
+        .all()
+    )
+    form_tugas_mahasiswa = TugasMahasiswaForm()
+    return render_template(
+        "periksa_tugas.html",
+        kelas=kelas,
+        tugas=tugas,
+        jawaban_mahasiswa=jawaban_mahasiswa,
+        form_tugas_mahasiswa=form_tugas_mahasiswa,
+        form_logout=form_logout
+    )
