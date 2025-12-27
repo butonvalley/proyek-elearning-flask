@@ -18,7 +18,7 @@
 - Support PostgreSQL & Serverless PostgreSQL seperti Supabase
 
 ## Migrasi Database
-Sebelum migrasi, pastikan `migrate.init_app(app, db)` pada `main.py` aktif (untuk production).
+Sebelum migrasi, pastikan `migrate.init_app(app, db)` pada `main.py` untuk mode development 
 
 ### Jika projek baru:
 
