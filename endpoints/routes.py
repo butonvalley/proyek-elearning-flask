@@ -183,7 +183,7 @@ def join_kelas_view(id):
             tugas_kelas = tugas_kelas,
             nilai_ipk_kelas=round(nilai_ipk_kelas, 2),
             form_tugas = form_tugas,
-            tanggal_hari_ini=datetime.now(timezone.utc)
+            tanggal_hari_ini=datetime.now(timezone.utc).replace(tzinfo=None)
         )
 
     # ======================

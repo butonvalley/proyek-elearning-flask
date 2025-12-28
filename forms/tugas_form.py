@@ -9,5 +9,5 @@ class TugasForm(FlaskForm):
     file_tugas = FileField(
         "File Tugas"
     )
-    deadline = DateTimeField("Deadline", format="%Y-%m-%d %H:%M")
+    deadline = DateTimeField("Deadline (Format: d-m-Y H:M)", format="%d-%m-%Y %H:%M")
     submit = SubmitField("Upload Tugas")
