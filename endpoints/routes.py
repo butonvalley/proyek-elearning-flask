@@ -27,6 +27,7 @@ from werkzeug.security import generate_password_hash,check_password_hash
 from utils.generator import generate_unique_username
 
 from sqlalchemy.orm import aliased
+from datetime import datetime,timezone
 
 main_bp = Blueprint("main", __name__)
 
@@ -181,7 +182,8 @@ def join_kelas_view(id):
             kelas=kelas,
             tugas_kelas = tugas_kelas,
             nilai_ipk_kelas=round(nilai_ipk_kelas, 2),
-            form_tugas = form_tugas
+            form_tugas = form_tugas,
+            tanggal_hari_ini=datetime.now(timezone.utc)
         )
 
     # ======================

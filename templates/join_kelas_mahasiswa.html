@@ -81,39 +81,49 @@
 
                         <div class="flex gap-4 items-center">
 
-                            <a class="underline bg-blue-100 px-2 py-1 rounded-sm" target="_blank"
-                                href="{{ url_for('static', filename='uploads/tugas/' ~ tugas.file_tugas) }}">
-                                Lihat
-                            </a>
-                            {% if jawaban %}
+    <a class="underline bg-blue-100 px-2 py-1 rounded-sm"
+       target="_blank"
+       href="{{ url_for('static', filename='uploads/tugas/' ~ tugas.file_tugas) }}">
+        Lihat
+    </a>
 
-                            {% if jawaban.nilai is not none %}
-                            <span class="bg-yellow-100 px-2 py-1 rounded-sm ">
-                                Nilai: <span class="font-bold ">{{ jawaban.nilai }}</span>
-                            </span>
-                            {% else %}
-                            <span class="bg-green-100 px-2 py-1 rounded-sm">
-                                ✅ Telah dikirim
-                            </span>
+    {% if jawaban %}
 
-                            {% endif %}
+        {% if jawaban.nilai is not none %}
+            <span class="bg-yellow-100 px-2 py-1 rounded-sm">
+                Nilai: <span class="font-bold">{{ jawaban.nilai }}</span>
+            </span>
+        {% else %}
+            <span class="bg-green-100 px-2 py-1 rounded-sm">
+                ✅ Telah dikirim
+            </span>
+        {% endif %}
 
-                            {% else %}
-                            <form method="POST" enctype="multipart/form-data"
-                                action="{{ url_for('main.upload_jawaban', tugas_id=tugas.id) }}">
+    {% else %}
 
-                                {{ form_tugas.hidden_tag() }}
+        {% if tugas.deadline and tugas.deadline < tanggal_hari_ini %}
+            <span class="bg-red-100 text-red-700 px-2 py-1 rounded-sm">
+                ⛔ Deadline terlewat
+            </span>
+        {% else %}
+            <form method="POST"
+                  enctype="multipart/form-data"
+                  action="{{ url_for('main.upload_jawaban', tugas_id=tugas.id) }}">
 
-                                {{ form_tugas.file_jawaban(class="") }}
+                {{ form_tugas.hidden_tag() }}
+                {{ form_tugas.file_jawaban() }}
 
-                                <button type="submit"
-                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                                    Kirim Jawaban
-                                </button>
-                            </form>
-                            {% endif %}
+                <button type="submit"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Kirim Jawaban
+                </button>
+            </form>
+        {% endif %}
 
-                        </div>
+    {% endif %}
+
+</div>
+
 
                     </div>
                     {% endfor %}
