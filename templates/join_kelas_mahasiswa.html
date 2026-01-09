@@ -82,13 +82,17 @@
 
                             <a class="underline bg-blue-100 px-2 py-1 rounded-sm" target="_blank"
                                 href="{{ tugas.file_tugas }}">
-                                Lihat
+                                Lihat Tugas
                             </a>
 
                             {% if jawaban and jawaban.nilai is not none %}
                             <!-- SUDAH DINILAI -->
                             <span class="bg-yellow-100 px-2 py-1 rounded-sm">
                                 Nilai: <span class="font-bold">{{ jawaban.nilai }}</span>
+                                <span> <a class="underline bg-blue-100 px-2 py-1 rounded-sm mb-4" target="_blank"
+                                        href="{{ jawaban.file_jawaban }}">
+                                        Lihat Jawaban
+                                    </a></span>
                             </span>
 
                             {% elif tugas.deadline and tugas.deadline < tanggal_hari_ini %} <!-- DEADLINE TERLEWAT -->
