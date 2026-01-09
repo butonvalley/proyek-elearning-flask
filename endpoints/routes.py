@@ -29,6 +29,8 @@ from utils.generator import generate_unique_username
 from sqlalchemy.orm import aliased
 from datetime import datetime,timezone
 
+from utils.supabase_client import delete_file_storage_supabase, upload_file_storage_supabase
+
 main_bp = Blueprint("main", __name__)
 
 
@@ -112,6 +114,7 @@ def join_kelas_view(id):
             kelas_id=kelas.id
         ).all()
         form_kelas_mahasiswa = KelasMahasiswaForm()
+        form_tugas= TugasForm()
         tugas_kelas = Tugas.query.filter_by(kelas_id = kelas.id).all()
         return render_template(
             "join_kelas_dosen.html",
@@ -119,7 +122,8 @@ def join_kelas_view(id):
             kelas=kelas,
             kelas_mahasiswa = km,
             tugas_kelas = tugas_kelas,
-            kelas_mahasiswa_form = form_kelas_mahasiswa
+            kelas_mahasiswa_form = form_kelas_mahasiswa,
+            form_tugas=form_tugas
         )
 
     # ======================
@@ -522,18 +526,14 @@ def tambah_tugas(kelas_id):
     form = TugasForm()
 
     if form.validate_on_submit():
-        print("valid")
         filename = None
         if form.file_tugas.data:
-            
-            filename = "tugas.pdf"
-
-            #Update V1.3 Upload ke Serveless Storage
-            #filename = secure_filename(form.file_tugas.data.filename)
-            #form.file_tugas.data.save(
-            #   Logic Serveless Storage
-            #)
-
+                     
+            filename = upload_file_storage_supabase(
+                form.file_tugas.data,
+                os.environ.get("SUPABASE_BUCKET_TUGAS")
+            )
+           
         tugas = Tugas(
             kelas_id=kelas.id,
             dosen_id=dosen.id,
@@ -551,6 +551,54 @@ def tambah_tugas(kelas_id):
     form_logout = LogoutForm()
     return render_template("tambah_tugas.html", form=form, kelas=kelas,form_logout=form_logout)
 
+@main_bp.route("/kelas/<kelas_id>/tugas/<tugas_id>/hapus", methods=["POST"])
+@login_required
+def hapus_tugas(kelas_id, tugas_id):
+    # ======================
+    # CEK ROLE DOSEN
+    # ======================
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    # ======================
+    # AMBIL TUGAS
+    # ======================
+    tugas = Tugas.query.get_or_404(tugas_id)
+
+    # ======================
+    # VALIDASI KEPEMILIKAN
+    # ======================
+    if tugas.dosen_id != dosen.id or tugas.kelas_id != kelas_id:
+        flash("Anda tidak memiliki hak untuk menghapus tugas ini", "error")
+        return redirect(url_for("main.join_kelas_view", id=kelas_id))
+
+    try:
+        # ======================
+        # HAPUS FILE DI SUPABASE
+        # ======================
+        if tugas.file_tugas:
+            delete_file_storage_supabase(
+                os.environ.get("SUPABASE_BUCKET_TUGAS"),
+                tugas.file_tugas
+            )
+
+        # ======================
+        # HAPUS DATABASE
+        # ======================
+        db.session.delete(tugas)
+        db.session.commit()
+
+        flash("Tugas berhasil dihapus", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Gagal menghapus tugas: {str(e)}", "error")
+
+    return redirect(url_for("main.join_kelas_view", id=kelas_id))
+
+
 #upload Jawaban oleh Mahasiswa
 @main_bp.route("/tugas/<tugas_id>/jawaban", methods=["POST"])
 @login_required
@@ -564,11 +612,13 @@ def upload_jawaban(tugas_id):
     form = TugasMahasiswaForm()
 
     if form.validate_on_submit():
-        filename = "jawaban.pdf"
-        
-        #update V1.3 Upload ke Serveless Storage
-        # filename = secure_filename(form.file_jawaban.data.filename)
-        # logic serveless storage
+        filename = None
+        if form.file_jawaban.data:
+                     
+            filename = upload_file_storage_supabase(
+                form.file_jawaban.data,
+                os.environ.get("SUPABASE_BUCKET_JAWABAN")
+            )
 
         jawaban = TugasMahasiswa(
             tugas_id=tugas.id,
@@ -579,6 +629,54 @@ def upload_jawaban(tugas_id):
         db.session.commit()
 
         flash("Jawaban berhasil dikumpulkan", "success")
+
+    return redirect(url_for("main.join_kelas_view", id=tugas.kelas_id))
+
+#Hapus Jawaban oleh Mahasiswa
+@main_bp.route("/tugas/<tugas_id>/hapus", methods=["POST"])
+@login_required
+def hapus_jawaban(tugas_id):
+    # ======================
+    # CEK ROLE MAHASISWA
+    # ======================
+    mahasiswa = getattr(current_user, "mahasiswa", None)
+    if not mahasiswa:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    tugas = Tugas.query.get_or_404(tugas_id)
+    if not tugas:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    # ======================
+    # AMBIL JAWABAN
+    # ======================
+    jawaban = TugasMahasiswa.query.filter(TugasMahasiswa.tugas_id == tugas_id,
+        TugasMahasiswa.mahasiswa_id == mahasiswa.id).first_or_404()
+
+   
+    try:
+        # ======================
+        # HAPUS FILE DI SUPABASE
+        # ======================
+        if jawaban.file_jawaban:
+            delete_file_storage_supabase(
+                os.environ.get("SUPABASE_BUCKET_JAWABAN"),
+                jawaban.file_jawaban
+            )
+
+        # ======================
+        # HAPUS DATABASE
+        # ======================
+        db.session.delete(jawaban)
+        db.session.commit()
+
+        flash("Jawaban berhasil dihapus", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Gagal menghapus jawaban: {str(e)}", "error")
 
     return redirect(url_for("main.join_kelas_view", id=tugas.kelas_id))
 

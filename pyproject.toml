@@ -9,5 +9,6 @@ dependencies = [
     "flask-migrate>=4.0",
     "flask-sqlalchemy>=3.0",
     "python-dotenv>=1.0",
-    "psycopg[binary]>=3.3"
+    "psycopg[binary]>=3.3",
+    "supabase>=2.27"
 ]

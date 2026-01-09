@@ -1,8 +1,7 @@
 from dotenv import load_dotenv
+load_dotenv()
 
 from models.user import User
-
-load_dotenv()
 
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect()

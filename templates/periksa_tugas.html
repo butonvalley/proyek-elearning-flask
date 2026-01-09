@@ -31,7 +31,7 @@
   <div class="border p-4 rounded mb-3 flex justify-between items-center">
     <div>
       <p class="font-bold">{{ j.mahasiswa.user.fullname }}</p>
-      <a href="{{ url_for('static', filename=j.file_jawaban) }}" class="underline text-blue-600" target="_blank">
+      <a href="{{ j.file_jawaban }}" class="underline text-blue-600" target="_blank">
         Lihat Jawaban
       </a>
     </div>

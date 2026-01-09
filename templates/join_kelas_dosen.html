@@ -71,8 +71,15 @@
                 <div class="font-bold">{{ tk.judul }}</div>
                 <div class="font-bold">Batas Waktu: {{ tk.deadline }}</div>
                 <div class="flex gap-4">
-                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank" href="{{ url_for('static', filename='uploads/tugas/' ~ tk.file_tugas) }}">Lihat</a>
+                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank" href="{{ tk.file_tugas }}">Lihat</a>
                     <a href="{{ url_for('main.periksa_jawaban_tugas', kelas_id=tk.kelas_id, tugas_id=tk.id) }}">Periksa</a>
+                     <form method="POST" action="{{ url_for('main.hapus_tugas', kelas_id=tk.kelas_id,tugas_id=tk.id) }}"
+              onsubmit="return confirm('Yakin ingin menghapus dataset ini?')">
+             {{ form_tugas.hidden_tag() }}
+                  <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                Hapus
+              </button>
+            </form>
                 </div>
 
             </div>

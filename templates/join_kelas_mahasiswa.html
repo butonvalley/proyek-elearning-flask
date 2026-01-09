@@ -53,19 +53,19 @@
         <div class="flex flex-col gap-4 justify-between">
 
             <div class="flex gap-4 justify-between">
-             
-                    <span>Materi {{kelas.matakuliah.nama}} </span>
-                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Download</a>
-                           
+
+                <span>Materi {{kelas.matakuliah.nama}} </span>
+                <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Download</a>
+
             </div>
             <div class="w-full ">
                 <div class="bg-green-300 p-4 mb-4 flex justify-between gap-4">
                     <h3 class="font-bold">
                         Tugas Kelas
                     </h3>
-                   <div >
-                    Nilai IPK Kelas: <span class="font-bold text-2xl">{{nilai_ipk_kelas}}</span> 
-                   </div> 
+                    <div>
+                        Nilai IPK Kelas: <span class="font-bold text-2xl">{{nilai_ipk_kelas}}</span>
+                    </div>
                 </div>
                 <div class="flex flex-col gap-3">
 
@@ -78,53 +78,63 @@
                                 Deadline: {{ tugas.deadline }}
                             </div>
                         </div>
-
                         <div class="flex gap-4 items-center">
 
-    <a class="underline bg-blue-100 px-2 py-1 rounded-sm"
-       target="_blank"
-       href="{{ url_for('static', filename='uploads/tugas/' ~ tugas.file_tugas) }}">
-        Lihat
-    </a>
+                            <a class="underline bg-blue-100 px-2 py-1 rounded-sm" target="_blank"
+                                href="{{ tugas.file_tugas }}">
+                                Lihat
+                            </a>
 
-    {% if jawaban %}
+                            {% if jawaban and jawaban.nilai is not none %}
+                            <!-- SUDAH DINILAI -->
+                            <span class="bg-yellow-100 px-2 py-1 rounded-sm">
+                                Nilai: <span class="font-bold">{{ jawaban.nilai }}</span>
+                            </span>
 
-        {% if jawaban.nilai is not none %}
-            <span class="bg-yellow-100 px-2 py-1 rounded-sm">
-                Nilai: <span class="font-bold">{{ jawaban.nilai }}</span>
-            </span>
-        {% else %}
-            <span class="bg-green-100 px-2 py-1 rounded-sm">
-                ✅ Telah dikirim
-            </span>
-        {% endif %}
+                            {% elif tugas.deadline and tugas.deadline < tanggal_hari_ini %} <!-- DEADLINE TERLEWAT -->
+                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded-sm">
+                                    ⛔ Deadline terlewat
+                                </span>
 
-    {% else %}
+                                {% elif jawaban %}
+                                <!-- SUDAH ADA JAWABAN (BELUM DEADLINE) -->
+                                <div class="bg-yellow-50 border border-yellow-300 p-3 rounded-md">
+                                    <p class="text-yellow-800 text-sm mb-2">
+                                        ✅ Jawaban sudah dikirim
+                                    </p>
 
-        {% if tugas.deadline and tugas.deadline < tanggal_hari_ini %}
-            <span class="bg-red-100 text-red-700 px-2 py-1 rounded-sm">
-                ⛔ Deadline terlewat
-            </span>
-        {% else %}
-            <form method="POST"
-                  enctype="multipart/form-data"
-                  action="{{ url_for('main.upload_jawaban', tugas_id=tugas.id) }}">
+                                    <a class="underline bg-blue-100 px-2 py-1 rounded-sm mb-4" target="_blank"
+                                        href="{{ jawaban.file_jawaban }}">
+                                        Lihat Jawaban
+                                    </a>
+                                    <form method="POST" action="{{ url_for('main.hapus_jawaban', tugas_id=tugas.id) }}"
+                                        onsubmit="return confirm('Yakin ingin menghapus jawaban? File akan dihapus permanen!')">
 
-                {{ form_tugas.hidden_tag() }}
-                {{ form_tugas.file_jawaban() }}
+                                        {{ form_tugas.hidden_tag() }}
 
-                <button type="submit"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Kirim Jawaban
-                </button>
-            </form>
-        {% endif %}
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                            Hapus dan Kirim Ulang Jawaban
+                                        </button>
+                                    </form>
+                                </div>
 
-    {% endif %}
+                                {% else %}
+                                <!-- BELUM ADA JAWABAN (BELUM DEADLINE) -->
+                                <form method="POST" enctype="multipart/form-data"
+                                    action="{{ url_for('main.upload_jawaban', tugas_id=tugas.id) }}">
 
-</div>
+                                    {{ form_tugas.hidden_tag() }}
+                                    {{ form_tugas.file_jawaban() }}
 
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                        Kirim Jawaban
+                                    </button>
+                                </form>
+                                {% endif %}
 
+                        </div>
                     </div>
                     {% endfor %}
 
