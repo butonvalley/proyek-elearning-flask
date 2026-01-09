@@ -22,6 +22,7 @@ migrations/
 # Environment variables
 # ======================
 .env
+.env.*
 
 # ======================
 # IDE / Editor
