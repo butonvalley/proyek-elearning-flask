@@ -48,66 +48,92 @@
             <h3 class="font-bold">{{ kelas.nama }} | {{ kelas.matakuliah.nama }} | {{ kelas.semester }} | {{
                 kelas.tahun_ajaran }}
             </h3>
-            <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Unggah Materi</a>
-        </div>
-
-        <div class="flex gap-4 justify-between">
-            <span>Materi {{kelas.matakuliah.nama}} </span>
-            <a class="underline bg-green-100 px-2 py-1 rounded-sm" href="#">Download</a>
-        </div>
-
-    </div>
-    <div class="w-full ">
-        <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
-            <h3 class="font-bold">
-                Tugas Kelas
-            </h3>
             <a class="underline bg-green-100 px-2 py-1 rounded-sm"
-                href="{{ url_for('main.tambah_tugas', kelas_id=kelas.id) }}">Unggah Tugas</a>
+                href="{{ url_for('main.tambah_materi', kelas_id=kelas.id) }}">Unggah Materi</a>
         </div>
-        <div class="flex flex-col gap-3">
-            {% for tk in tugas_kelas %}
-            <div class="flex gap-4 justify-between px-4">
-                <div class="font-bold">{{ tk.judul }}</div>
-                <div class="font-bold">Batas Waktu: {{ tk.deadline }}</div>
-                <div class="flex gap-4">
-                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank" href="{{ tk.file_tugas }}">Lihat</a>
-                    <a href="{{ url_for('main.periksa_jawaban_tugas', kelas_id=tk.kelas_id, tugas_id=tk.id) }}">Periksa</a>
-                     <form method="POST" action="{{ url_for('main.hapus_tugas', kelas_id=tk.kelas_id,tugas_id=tk.id) }}"
-              onsubmit="return confirm('Yakin ingin menghapus dataset ini?')">
-             {{ form_tugas.hidden_tag() }}
-                  <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                Hapus
-              </button>
-            </form>
-                </div>
 
+        <div class="flex flex-col gap-4">
+            {% for materi in materi_kelas %}
+            <div class="bg-gray-50 p-4 rounded-md shadow-xl">
+                <div class="mb-2 font-bold">{{materi.judul}} </div>
+                <div class="flex gap-4 justify-between">
+                    {%if materi.link_eksternal %}
+                    <a target="_blank" href="{{materi.link_eksternal}}">Link Eksternal
+
+                        {% endif %}
+
+                        {%if materi.file %}
+                        <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank"
+                            href="{{materi.file}}">Download</a>
+                        {%endif%}
+
+                        <form method="POST"
+                            action="{{ url_for('main.hapus_materi', kelas_id=materi.kelas_id,materi_id=materi.id) }}"
+                            onsubmit="return confirm('Yakin ingin menghapus materi ini?')">
+                            {{ form_materi.hidden_tag() }}
+                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                Hapus
+                            </button>
+                        </form>
+                </div>
             </div>
             {% endfor %}
         </div>
-
     </div>
-    <div class="w-full ">
-        <div class="bg-red-300 p-4 mb-4">
-            <h3 class="font-bold">
-                Mahasiswa yang bergabung
-            </h3>
+
+</div>
+<div class="w-full ">
+    <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
+        <h3 class="font-bold">
+            Tugas Kelas
+        </h3>
+        <a class="underline bg-green-100 px-2 py-1 rounded-sm"
+            href="{{ url_for('main.tambah_tugas', kelas_id=kelas.id) }}">Unggah Tugas</a>
+    </div>
+    <div class="flex flex-col gap-3">
+        {% for tk in tugas_kelas %}
+        <div class="flex gap-4 justify-between px-4">
+            <div class="font-bold">{{ tk.judul }}</div>
+            <div class="font-bold">Batas Waktu: {{ tk.deadline }}</div>
+            <div class="flex gap-4">
+                <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank"
+                    href="{{ tk.file_tugas }}">Lihat</a>
+                <a href="{{ url_for('main.periksa_jawaban_tugas', kelas_id=tk.kelas_id, tugas_id=tk.id) }}">Periksa</a>
+                <form method="POST" action="{{ url_for('main.hapus_tugas', kelas_id=tk.kelas_id,tugas_id=tk.id) }}"
+                    onsubmit="return confirm('Yakin ingin menghapus dataset ini?')">
+                    {{ form_tugas.hidden_tag() }}
+                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                        Hapus
+                    </button>
+                </form>
+            </div>
+
         </div>
-        <div class="flex flex-col gap-3">
-            {% for km in kelas_mahasiswa %}
-            <div class="flex gap-4 justify-between px-4">
-                <div class="font-bold">{{ km.mahasiswa.user.fullname }}</div>
-            
-                <!--untuk update v1.3
+        {% endfor %}
+    </div>
+
+</div>
+<div class="w-full ">
+    <div class="bg-red-300 p-4 mb-4">
+        <h3 class="font-bold">
+            Mahasiswa yang bergabung
+        </h3>
+    </div>
+    <div class="flex flex-col gap-3">
+        {% for km in kelas_mahasiswa %}
+        <div class="flex gap-4 justify-between px-4">
+            <div class="font-bold">{{ km.mahasiswa.user.fullname }}</div>
+
+            <!--untuk update v1.3
                 <div>                   
                   Nilai Kumulatif:  <span class="font-bold text-2xl">{{km.nilai_akhir if km.nilai_akhir is not none else 0 }}</span> 
                 </div>
                 -->
-                
-            </div>
-            {% endfor %}
-        </div>
 
+        </div>
+        {% endfor %}
     </div>
+
+</div>
 </div>
 {% endblock %}

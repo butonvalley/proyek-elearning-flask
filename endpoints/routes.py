@@ -10,6 +10,7 @@ from forms.login_form import LoginForm
 from forms.logout_form import LogoutForm
 from forms.mahasiswa_form import MahasiswaForm
 from forms.matakuliah_form import MataKuliahForm
+from forms.materi_form import MateriForm
 from forms.register_form import RegisterForm
 from forms.tugas_form import TugasForm
 from forms.tugas_mahasiswa_form import TugasMahasiswaForm
@@ -18,6 +19,7 @@ from models.kelas import Kelas
 from models.kelas_mahasiswa import KelasMahasiswa
 from models.mahasiswa import Mahasiswa
 from models.matakuliah import MataKuliah
+from models.materi import Materi
 from models.tugas import Tugas
 from models.tugas_mahasiswa import TugasMahasiswa
 from models.user import User
@@ -116,6 +118,10 @@ def join_kelas_view(id):
         form_kelas_mahasiswa = KelasMahasiswaForm()
         form_tugas= TugasForm()
         tugas_kelas = Tugas.query.filter_by(kelas_id = kelas.id).all()
+
+        form_materi= MateriForm()
+        materi_kelas = Materi.query.filter_by(kelas_id = kelas.id).all()
+      
         return render_template(
             "join_kelas_dosen.html",
             form_logout=form_logout,
@@ -123,7 +129,9 @@ def join_kelas_view(id):
             kelas_mahasiswa = km,
             tugas_kelas = tugas_kelas,
             kelas_mahasiswa_form = form_kelas_mahasiswa,
-            form_tugas=form_tugas
+            form_tugas=form_tugas,
+            form_materi=form_materi,
+            materi_kelas=materi_kelas
         )
 
     # ======================
@@ -180,6 +188,8 @@ def join_kelas_view(id):
             nilai_ipk_kelas = 0
 
         form_tugas = TugasMahasiswaForm()
+        materi_kelas = Materi.query.filter_by(kelas_id = kelas.id).all()
+
         return render_template(
             "join_kelas_mahasiswa.html",
             form_logout=form_logout,
@@ -187,6 +197,7 @@ def join_kelas_view(id):
             tugas_kelas = tugas_kelas,
             nilai_ipk_kelas=round(nilai_ipk_kelas, 2),
             form_tugas = form_tugas,
+            materi_kelas=materi_kelas,
             tanggal_hari_ini=datetime.now(timezone.utc).replace(tzinfo=None)
         )
 
@@ -499,21 +510,6 @@ def add_matakuliah_view():
 
     return render_template("tambah_matakuliah.html", form_logout = LogoutForm(), form=form)
 
-#Tentang - Syarat dan Ketentuan dalam pengembangan tahap selanjutnya diganti dengan model dan form PAGE
-@main_bp.route("/tentang-kami")
-def about_view():
-    form = LogoutForm()
-    return render_template("tentang.html",form_logout=form)
-
-@main_bp.route("/syarat-ketentuan")
-def tos_view():
-    form = LogoutForm()
-    return render_template("syarat.html",form_logout=form)
-
-@main_bp.route("/page/<slug>")
-def page_view():   
-    return render_template("page.html")
-
 @main_bp.route("/kelas/<kelas_id>/tugas/tambah", methods=["GET", "POST"])
 @login_required
 def tambah_tugas(kelas_id):
@@ -597,7 +593,6 @@ def hapus_tugas(kelas_id, tugas_id):
         flash(f"Gagal menghapus tugas: {str(e)}", "error")
 
     return redirect(url_for("main.join_kelas_view", id=kelas_id))
-
 
 #upload Jawaban oleh Mahasiswa
 @main_bp.route("/tugas/<tugas_id>/jawaban", methods=["POST"])
@@ -746,3 +741,103 @@ def periksa_jawaban_tugas(kelas_id, tugas_id):
         form_tugas_mahasiswa=form_tugas_mahasiswa,
         form_logout=form_logout
     )
+
+@main_bp.route("/kelas/<kelas_id>/materi/tambah", methods=["GET", "POST"])
+@login_required
+def tambah_materi(kelas_id):
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+    
+    kelas = Kelas.query.get_or_404(kelas_id)
+    if not kelas:
+        flash("Kelas tidak ditemukan", "error")
+        return redirect(url_for("main.join_kelas_view",id=kelas_id))
+    
+    form = MateriForm()
+    if form.validate_on_submit():
+        file_url = None
+        if form.file.data:
+            # gunakan fungsi upload supabase (sesuaikan bucket)
+            file_url = upload_file_storage_supabase(
+                form.file.data, os.environ.get("SUPABASE_BUCKET_MATERI")
+            )
+
+        materi = Materi(
+            kelas_id=kelas_id,
+            dosen_id=dosen.id,
+            judul=form.judul.data,
+            deskripsi=form.deskripsi.data,
+            link_eksternal=form.link_eksternal.data,
+            file=file_url
+        )
+        db.session.add(materi)
+        db.session.commit()
+
+        flash("Materi berhasil ditambahkan", "success")
+        return redirect(url_for("main.join_kelas_view", id=kelas_id))
+    form_logout = LogoutForm()
+    return render_template("tambah_materi.html", form=form, kelas=kelas,form_logout=form_logout)
+
+@main_bp.route("/kelas/<kelas_id>/materi/<materi_id>/hapus", methods=["POST"])
+@login_required
+def hapus_materi(kelas_id, materi_id):
+    # ======================
+    # CEK ROLE DOSEN
+    # ======================
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    # ======================
+    # AMBIL MATERI
+    # ======================
+    materi = Materi.query.get_or_404(materi_id)
+
+    # ======================
+    # VALIDASI KEPEMILIKAN
+    # ======================
+    if materi.dosen_id != dosen.id or materi.kelas_id != kelas_id:
+        flash("Anda tidak memiliki hak untuk menghapus tugas ini", "error")
+        return redirect(url_for("main.join_kelas_view", id=kelas_id))
+
+    try:
+        # ======================
+        # HAPUS FILE DI SUPABASE
+        # ======================
+        if materi.file:
+            delete_file_storage_supabase(
+                os.environ.get("SUPABASE_BUCKET_MATERI"),
+                materi.file
+            )
+
+        # ======================
+        # HAPUS DATABASE
+        # ======================
+        db.session.delete(materi)
+        db.session.commit()
+
+        flash("Materi berhasil dihapus", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Gagal menghapus tugas: {str(e)}", "error")
+
+    return redirect(url_for("main.join_kelas_view", id=kelas_id))
+
+#Tentang - Syarat dan Ketentuan dalam pengembangan tahap selanjutnya diganti dengan model dan form PAGE
+@main_bp.route("/tentang-kami")
+def about_view():
+    form = LogoutForm()
+    return render_template("tentang.html",form_logout=form)
+
+@main_bp.route("/syarat-ketentuan")
+def tos_view():
+    form = LogoutForm()
+    return render_template("syarat.html",form_logout=form)
+
+@main_bp.route("/page/<slug>")
+def page_view():   
+    return render_template("page.html")
