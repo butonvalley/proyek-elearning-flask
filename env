@@ -1,0 +1,15 @@
+#serveless database url support IPv4
+POSTGRES_DATABASE_URL="postgresql+psycopg://postgres.[username]:[password]@[pool]:5432/postgres?sslmode=require"
+
+POSTGRES_HOST =""
+POSTGRES_USER = ""
+POSTGRES_PASSWORD=""
+POSTGRES_DATABASE=""
+POSTGRES_PORT="5432"
+
+SUPABASE_URL=""
+SUPABASE_SECRET_KEY=""
+SUPABASE_BUCKET_TUGAS="tugas"
+SUPABASE_BUCKET_JAWABAN="jawaban"
+SUPABASE_BUCKET_MATERI="materi"
+
