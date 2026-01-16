@@ -11,6 +11,7 @@ from forms.logout_form import LogoutForm
 from forms.mahasiswa_form import MahasiswaForm
 from forms.matakuliah_form import MataKuliahForm
 from forms.materi_form import MateriForm
+from forms.penilaian_kelas_form import PenilaianKelasForm
 from forms.register_form import RegisterForm
 from forms.tugas_form import TugasForm
 from forms.tugas_mahasiswa_form import TugasMahasiswaForm
@@ -20,12 +21,14 @@ from models.kelas_mahasiswa import KelasMahasiswa
 from models.mahasiswa import Mahasiswa
 from models.matakuliah import MataKuliah
 from models.materi import Materi
+from models.penilaian_kelas import PenilaianKelas
 from models.tugas import Tugas
 from models.tugas_mahasiswa import TugasMahasiswa
 from models.user import User
 
 from werkzeug.security import generate_password_hash,check_password_hash
 
+from utils.converter import konversi_nilai_ke_huruf
 from utils.generator import generate_unique_username
 
 from sqlalchemy.orm import aliased
@@ -115,6 +118,33 @@ def join_kelas_view(id):
         km = KelasMahasiswa.query.filter_by(
             kelas_id=kelas.id
         ).all()
+
+        penilaian = kelas.penilaian  # PenilaianKelas (boleh None)
+
+        for km_item in km:
+            # ambil semua jawaban mahasiswa ini
+            jawaban_list = (
+                TugasMahasiswa.query
+                .join(Tugas)
+                .filter(
+                    Tugas.kelas_id == kelas.id,
+                    TugasMahasiswa.mahasiswa_id == km_item.mahasiswa_id,
+                    TugasMahasiswa.nilai.isnot(None)
+                )
+                .all()
+            )
+
+            total_tugas = Tugas.query.filter_by(kelas_id=kelas.id).count()
+            total_nilai = sum(j.nilai for j in jawaban_list)
+
+            if total_tugas > 0:
+                rata_nilai = total_nilai / total_tugas
+            else:
+                rata_nilai = 0
+
+            km_item.rata_nilai = round(rata_nilai, 2)
+            km_item.nilai_huruf = konversi_nilai_ke_huruf(rata_nilai, penilaian)
+
         form_kelas_mahasiswa = KelasMahasiswaForm()
         form_tugas= TugasForm()
         tugas_kelas = Tugas.query.filter_by(kelas_id = kelas.id).all()
@@ -183,10 +213,16 @@ def join_kelas_view(id):
         )
 
         if total_tugas > 0:
-            nilai_ipk_kelas = total_nilai / total_tugas
+            rata_nilai = total_nilai / total_tugas
         else:
-            nilai_ipk_kelas = 0
+            rata_nilai = 0
 
+        penilaian = kelas.penilaian
+
+        nilai_huruf_ipk = konversi_nilai_ke_huruf(
+            rata_nilai,
+            penilaian
+)
         form_tugas = TugasMahasiswaForm()
         materi_kelas = Materi.query.filter_by(kelas_id = kelas.id).all()
 
@@ -195,7 +231,8 @@ def join_kelas_view(id):
             form_logout=form_logout,
             kelas=kelas,
             tugas_kelas = tugas_kelas,
-            nilai_ipk_kelas=round(nilai_ipk_kelas, 2),
+            nilai_ipk_kelas=round(rata_nilai, 2),
+            nilai_huruf_ipk=nilai_huruf_ipk,
             form_tugas = form_tugas,
             materi_kelas=materi_kelas,
             tanggal_hari_ini=datetime.now(timezone.utc).replace(tzinfo=None)
@@ -826,6 +863,51 @@ def hapus_materi(kelas_id, materi_id):
         flash(f"Gagal menghapus tugas: {str(e)}", "error")
 
     return redirect(url_for("main.join_kelas_view", id=kelas_id))
+
+#setting penilaian
+@main_bp.route("/kelas/<kelas_id>/penilaian", methods=["GET", "POST"])
+@login_required
+def penilaian_kelas(kelas_id):
+    dosen = getattr(current_user, "dosen", None)
+    if not dosen:
+        flash("Akses ditolak", "error")
+        return redirect(url_for("main.home_view"))
+
+    kelas = Kelas.query.get_or_404(kelas_id)
+    form = PenilaianKelasForm()
+
+    penilaian = PenilaianKelas.query.filter_by(kelas_id=kelas.id).first()
+
+    if form.validate_on_submit():
+        if not penilaian:
+            penilaian = PenilaianKelas(kelas_id=kelas.id)
+
+        penilaian.nilai_a_min = form.nilai_a_min.data
+        penilaian.nilai_b_min = form.nilai_b_min.data
+        penilaian.nilai_c_min = form.nilai_c_min.data
+        penilaian.nilai_d_min = form.nilai_d_min.data
+        penilaian.nilai_e_min = form.nilai_e_min.data
+
+        db.session.add(penilaian)
+        db.session.commit()
+
+        flash("Skema penilaian berhasil disimpan", "success")
+        return redirect(url_for("main.join_kelas_view", id=kelas.id))
+
+    if penilaian:
+        form.nilai_a_min.data = penilaian.nilai_a_min
+        form.nilai_b_min.data = penilaian.nilai_b_min
+        form.nilai_c_min.data = penilaian.nilai_c_min
+        form.nilai_d_min.data = penilaian.nilai_d_min
+        form.nilai_e_min.data = penilaian.nilai_e_min
+
+    form_logout = LogoutForm()
+    return render_template(
+        "penilaian_kelas.html",
+        form=form,
+        kelas=kelas,
+        form_logout=form_logout
+    )
 
 #Tentang - Syarat dan Ketentuan dalam pengembangan tahap selanjutnya diganti dengan model dan form PAGE
 @main_bp.route("/tentang-kami")

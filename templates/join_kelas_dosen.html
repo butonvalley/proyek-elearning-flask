@@ -41,49 +41,49 @@
 {% endif %}
 {% endwith %}
 
-<div class="px-4 grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
-
-    <div class="w-full ">
-        <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
-            <h3 class="font-bold">{{ kelas.nama }} | {{ kelas.matakuliah.nama }} | {{ kelas.semester }} | {{
-                kelas.tahun_ajaran }}
-            </h3>
-            <a class="underline bg-green-100 px-2 py-1 rounded-sm"
-                href="{{ url_for('main.tambah_materi', kelas_id=kelas.id) }}">Unggah Materi</a>
-        </div>
-
-        <div class="flex flex-col gap-4">
-            {% for materi in materi_kelas %}
-            <div class="bg-gray-50 p-4 rounded-md shadow-xl">
-                <div class="mb-2 font-bold">{{materi.judul}} </div>
-                <div class="flex gap-4 justify-between">
-                    {%if materi.link_eksternal %}
-                    <a target="_blank" href="{{materi.link_eksternal}}">Link Eksternal
-
-                        {% endif %}
-
-                        {%if materi.file %}
-                        <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank"
-                            href="{{materi.file}}">Download</a>
-                        {%endif%}
-
-                        <form method="POST"
-                            action="{{ url_for('main.hapus_materi', kelas_id=materi.kelas_id,materi_id=materi.id) }}"
-                            onsubmit="return confirm('Yakin ingin menghapus materi ini?')">
-                            {{ form_materi.hidden_tag() }}
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                Hapus
-                            </button>
-                        </form>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+<div class="w-full p-4 mb-4 bg-green-300 ">
+    <div class="mb-4 flex gap-4 justify-between">
+        <h3 class="font-bold">{{ kelas.nama }} | {{ kelas.matakuliah.nama }} | {{ kelas.semester }} | {{
+            kelas.tahun_ajaran }}
+        </h3>
+        <a class="underline bg-green-100 px-2 py-1 rounded-sm"
+            href="{{ url_for('main.tambah_materi', kelas_id=kelas.id) }}">Unggah Materi</a>
+        <a class="underline bg-green-100 px-2 py-1 rounded-sm"
+            href="{{ url_for('main.penilaian_kelas', kelas_id=kelas.id) }}">Setting Penilaian</a>
     </div>
 
+    <div class="flex flex-col gap-4">
+        {% for materi in materi_kelas %}
+        <div class="bg-gray-50 p-4 rounded-md shadow-xl">
+            <div class="mb-2 font-bold">{{materi.judul}} </div>
+            <div class="flex gap-4 justify-between">
+                {%if materi.link_eksternal %}
+                <a target="_blank" href="{{materi.link_eksternal}}">Link Eksternal
+
+                    {% endif %}
+
+                    {%if materi.file %}
+                    <a class="underline bg-green-100 px-2 py-1 rounded-sm" target="_blank"
+                        href="{{materi.file}}">Download</a>
+                    {%endif%}
+
+                    <form method="POST"
+                        action="{{ url_for('main.hapus_materi', kelas_id=materi.kelas_id,materi_id=materi.id) }}"
+                        onsubmit="return confirm('Yakin ingin menghapus materi ini?')">
+                        {{ form_materi.hidden_tag() }}
+                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                            Hapus
+                        </button>
+                    </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-<div class="w-full ">
-    <div class="bg-green-300 p-4 mb-4 flex gap-4 justify-between">
+
+
+<div class="w-full p-4 mb-4 bg-green-300 ">
+    <div class="mb-4 flex gap-4 justify-between">
         <h3 class="font-bold">
             Tugas Kelas
         </h3>
@@ -92,7 +92,7 @@
     </div>
     <div class="flex flex-col gap-3">
         {% for tk in tugas_kelas %}
-        <div class="flex gap-4 justify-between px-4">
+        <div class="flex gap-4 justify-between p-4 bg-gray-50">
             <div class="font-bold">{{ tk.judul }}</div>
             <div class="font-bold">Batas Waktu: {{ tk.deadline }}</div>
             <div class="flex gap-4">
@@ -113,22 +113,25 @@
     </div>
 
 </div>
-<div class="w-full ">
-    <div class="bg-red-300 p-4 mb-4">
-        <h3 class="font-bold">
-            Mahasiswa yang bergabung
-        </h3>
-    </div>
+<div class="w-full p-4 mb-4 bg-green-300 ">
+
+    <h3 class="font-bold mb-4">
+        Mahasiswa yang bergabung
+    </h3>
+
     <div class="flex flex-col gap-3">
         {% for km in kelas_mahasiswa %}
-        <div class="flex gap-4 justify-between px-4">
+        <div class="flex gap-4 justify-between bg-gray-50 p-4">
             <div class="font-bold">{{ km.mahasiswa.user.fullname }}</div>
+            <div>
+                Nilai Rata-rata: {{ km.rata_nilai }}
+            </div>
 
-            <!--untuk update v1.3
-                <div>                   
-                  Nilai Kumulatif:  <span class="font-bold text-2xl">{{km.nilai_akhir if km.nilai_akhir is not none else 0 }}</span> 
-                </div>
-                -->
+            <div>
+                <span class="px-2 py-1 rounded bg-blue-100 font-bold">
+                    Nilai dengan Huruf: {{ km.nilai_huruf }}
+                </span>
+            </div>
 
         </div>
         {% endfor %}

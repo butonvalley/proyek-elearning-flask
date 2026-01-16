@@ -68,8 +68,34 @@ Mahasiswa dapat melakukan join kelas semua DOSEN
 - **Fitur IPK Kelas**
   - IPK kelas merupakan jumlah keseluruhan nilai tugas kelas dibagi dengan jumlah tugas kelas
 
+# UPDATE: PROYEK ELEARNING V1.2
+## General
+- Storage: Serveles Storage Supabase
+- 
+
+## Role Dosen
+- **Fitur Materi Kelas**
+  - CRUD Materi Kelas
+
+## Role Mahasiswa
+- **Fitur Materi**
+  - Lihat dan unduh Materi Kelas
+
+
+
+# UPDATE: PROYEK ELEARNING V1.3
+
+## Role Dosen
+- **Fitur Materi Kelas**
+  - Setting Penilaian Tiap Kelas
+  - Melihat Nilai Rata-rata dalam angka dan huruf tiap mahasiswa yang bergabung di kelas
+
+## Role Mahasiswa
+- **Fitur Materi**
+  - Melihat Nilai Rata-rata dalam angka dan Huruf
+
+
 ### Notes
-- Next Update V1.3 (Pengelolaan File Tugas dan Jawaban Tugas ke Serverless Storage)
 - Code program pada Fitur Tugas dapat dilihat pada timeline commit
     
     
